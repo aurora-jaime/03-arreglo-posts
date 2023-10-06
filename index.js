@@ -53,7 +53,7 @@ app.get('/posts/:id', (req, res)=>{
     const posteo = posteos.find(p => p.id === idBuscado)
     if(!posteo) {
         res.status(404)
-        return res.json({"message": "No encontrado"})
+        return res.json({"message": "Not found"})
     }
     res.send(posteo)
 })
@@ -65,13 +65,13 @@ app.delete('/posts/:id', (req, res)=>{
     // Buscar y recuperar del arreglo posteos el objeto con identificador igual a id
     const indexPosteo = posteos.findIndex(p => p.id === idBuscado)
     if(indexPosteo===-1) {
-        return res.status(404).json({"message": "No encontrado"})
+        return res.status(404).json({"message": "Not found"})
     }
 
     // Eliminar del arreglo el objeto con índice indexPosteo
     posteos.splice(indexPosteo,1)
 
-    res.json({"message": "Elemento eliminado"})
+    res.json({"message": "Post deleted"})
 })
 
 // Agregar un posteo nuevo al final del arreglo
@@ -107,13 +107,45 @@ app.post('/posts', (req, res)=>{
 
 // Actualizar uno o más campos de un posteo existente
 app.patch('/posts/:id',(req,res)=>{
-    res.send('Actualizar postero') // Temporal
+    // console.log(req.params.id);
+    const idBuscado = parseInt(req.params.id)
+
+    // Buscar y recuperar del arreglo posteos el objeto con identificador igual a id
+    const indexPosteo = posteos.findIndex(p => p.id === idBuscado)
+    if(indexPosteo===-1) {
+        return res.status(404).json({"message": "Not found"})
+    }
+
+    // Quitar espacios en blanco antes y después de la cadena
+    let title = req.body.title
+    let content = req.body.content
+    let author = req.body.author
+
+    if(title) title.trim()
+    if(content) content.trim()
+    if(author) author.trim()
+
+    console.log(title);
+    console.log(content);
+    console.log(author);
+
+    // Verificar si todos los campos son undefined
+    if(!title && !content && !author) {
+        return res.status(400).json({"message": "Missing data"})
+    }
+
+    if(title) posteos[indexPosteo].title = title
+    if(content) posteos[indexPosteo].content = content
+    if(author) posteos[indexPosteo].author = author
+
+    res.json(posteos[indexPosteo])
 }) 
 
+// Ruta no existente
 app.use((req,res)=>{
-    res.send('Página no encontrada')
+    res.send('Not found')
 })
 
 app.listen(port, ()=>{
-    console.log('Escuchando peticiones en el puerto ' + port);
+    console.log('Listening for requests on port ' + port);
 })
