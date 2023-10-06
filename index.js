@@ -125,10 +125,6 @@ app.patch('/posts/:id',(req,res)=>{
     if(content) content.trim()
     if(author) author.trim()
 
-    console.log(title);
-    console.log(content);
-    console.log(author);
-
     // Verificar si todos los campos son undefined
     if(!title && !content && !author) {
         return res.status(400).json({"message": "Missing data"})
