@@ -33,8 +33,9 @@ const posteos = [
 
 const app = express()
 
+// Middleware para analizar el cuerpo de la petición
 app.use(bodyParser.json())
-app.use(bodyParser.urlencoded())
+app.use(bodyParser.urlencoded({"extended": true}))
 
 app.get('/', (req,res)=>{
     res.send('La página principal')
@@ -50,7 +51,10 @@ app.get('/posts/:id', (req, res)=>{
 
     // Buscar y recuperar del arreglo posteos el objeto con identificador igual a id
     const posteo = posteos.find(p => p.id === idBuscado)
-    if(!posteo) res.json({"message": "No encontrado"})
+    if(!posteo) {
+        res.status(404)
+        return res.json({"message": "No encontrado"})
+    }
     res.send(posteo)
 })
 
@@ -60,7 +64,9 @@ app.delete('/posts/:id', (req, res)=>{
 
     // Buscar y recuperar del arreglo posteos el objeto con identificador igual a id
     const indexPosteo = posteos.findIndex(p => p.id === idBuscado)
-    if(indexPosteo===-1) res.json({"message": "No encontrado"})
+    if(indexPosteo===-1) {
+        return res.status(404).json({"message": "No encontrado"})
+    }
 
     // Eliminar del arreglo el objeto con índice indexPosteo
     posteos.splice(indexPosteo,1)
@@ -70,10 +76,33 @@ app.delete('/posts/:id', (req, res)=>{
 
 // Agregar un posteo nuevo al final del arreglo
 app.post('/posts', (req, res)=>{
-    console.log(req.body.title);
-    console.log(req.body.content);
-    console.log(req.body.author);
-    res.send('Agregar nuevo') // Temporal
+    // console.log(req.body.title);
+    // console.log(req.body.content);
+    // console.log(req.body.author);
+
+    // Quitar espacios en blanco antes y después de la cadena
+    let title = req.body.title.trim()
+    let content = req.body.content.trim()
+    let author = req.body.author.trim()
+
+    // Verificar que se tenga toda la información
+    if(!title || !content || !author) {
+        return res.status(400).json({"message": "Missing data"})
+    }
+
+    // Crear objeto del posteo nuevo
+    let newPost = {
+        "id": ++lastId, // Incrementar y actualizar el número de identificador
+        "title": title,
+        "content": content,
+        "author": author,
+        "date": new Date()
+    }
+
+    // Agregar nuevo objeto al final del arreglo
+    posteos.push(newPost)
+
+    res.status(201).json(newPost)
 })
 
 // Actualizar uno o más campos de un posteo existente
